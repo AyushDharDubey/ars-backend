@@ -3,3 +3,10 @@
 
 # Compiled .pyc files
 __pycache__/
+
+# Migrations
+**/migrations/**
+!**/migrations/__init__.py
+
+# local test files
+/uploads/
