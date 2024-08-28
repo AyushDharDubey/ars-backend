@@ -5,7 +5,6 @@ from assignment.models import (
     Team,
 )
 from datetime import timezone
-from django.utils.dateparse import parse_datetime
 from django.contrib.auth import get_user_model
 
 User = get_user_model()

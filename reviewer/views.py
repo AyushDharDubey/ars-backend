@@ -4,13 +4,11 @@ from .serializers import (
     CreateTeamSerializer,
     AssignmentSerializer,
 )
-from rest_framework.viewsets import ModelViewSet
 from rest_framework.generics import (
     CreateAPIView,
     ListAPIView,
     RetrieveUpdateAPIView,
 )
-from rest_framework import status
 from django.db.models import Q
 
 
@@ -27,8 +25,8 @@ class ListAssignmentView(ListAPIView):
 
     def get_queryset(self):
         return Assignment.objects.filter(
-            Q(reviewers=self.request.user) | Q(created_by=self.request.user)
-        ).distinct()
+            reviewers=self.request.user
+        )
 
 
 class RetrieveUpdateAssignmentView(RetrieveUpdateAPIView):
@@ -36,8 +34,8 @@ class RetrieveUpdateAssignmentView(RetrieveUpdateAPIView):
 
     def get_queryset(self):
         return Assignment.objects.filter(
-            Q(reviewers=self.request.user) | Q(created_by=self.request.user)
-        ).distinct()
+            reviewers=self.request.user
+        )
 
     def retrieve(self, request, *args, **kwargs):
         response = super().retrieve(request, *args, **kwargs)
