@@ -4,12 +4,20 @@ from django.contrib.auth import get_user_model
 User = get_user_model()
 
 
+class Team(models.Model):
+    members = models.ManyToManyField(User, related_name="teams")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+
 class Assignment(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField()
     file = models.FileField(upload_to="uploads/assignment/", blank=True, null=True)
     due_date = models.DateTimeField()
-    reviewers = models.ManyToManyField(User, related_name="reviewer_assignments")
+    assigned_to = models.ManyToManyField(User, blank=True, related_name="reviewee_assignments")
+    assigned_to_teams = models.ManyToManyField(Team, blank=True, related_name="assignments")
+    reviewers = models.ManyToManyField(User, blank=True, related_name="reviewer_assignments")
     created_by = models.ForeignKey(
         User, on_delete=models.SET_NULL, null=True, related_name="created_assignments"
     )
@@ -31,25 +39,6 @@ class Subtask(models.Model):
 
     def __str__(self):
         return self.title
-
-
-class Team(models.Model):
-    members = models.ManyToManyField(User, related_name="teams")
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-
-class AssignmentAllocation(models.Model):
-    assignment = models.ForeignKey(
-        Assignment, on_delete=models.CASCADE, related_name="allocations"
-    )
-    allocated_to = models.ManyToManyField(
-        User, blank=True, related_name="allocated_assignments"
-    )
-    team = models.ManyToManyField(Team, related_name="allocated_assignments", blank=True)
-    reviewer = models.ManyToManyField(User, related_name="assignment_allocations")
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
 
 class Submission(models.Model):

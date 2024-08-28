@@ -3,7 +3,6 @@ from .models import (
     Assignment,
     Subtask,
     Team,
-    AssignmentAllocation,
     Submission,
     Review
 )
@@ -11,6 +10,5 @@ from .models import (
 admin.site.register(Assignment)
 admin.site.register(Subtask)
 admin.site.register(Team)
-admin.site.register(AssignmentAllocation)
 admin.site.register(Submission)
 admin.site.register(Review)
