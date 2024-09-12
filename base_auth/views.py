@@ -171,8 +171,7 @@ class SignupAPIView(GenericAPIView):
             )
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
-            user = authenticate(username=request.data['username'], password = request.data['password'])
+            user = serializer.save()
             user.groups.add(group)
             user.save()
             refresh_token = RefreshToken.for_user(user)
