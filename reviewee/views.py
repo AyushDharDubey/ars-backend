@@ -14,7 +14,7 @@ class ListAssignmentsView(ListAPIView):
         ).distinct()
 
 
-class PendingAssignmentsView(ListAPIView):
+class ListPendingAssignmentsView(ListAPIView):
     serializer_class = AssignmentSerializer
 
     def get_queryset(self):
@@ -29,7 +29,7 @@ class PendingAssignmentsView(ListAPIView):
 
         return pending_assignments
 
-class SubmissionView(CreateAPIView):
+class CreateSubmissionView(CreateAPIView):
     serializer_class = SubmissionSerializer
 
     def get_serializer_context(self):
