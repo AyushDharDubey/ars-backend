@@ -1,6 +1,6 @@
 from assignment.models import Submission, Review, Assignment
-from .serializers import AssignmentSerializer
-from rest_framework.generics import RetrieveUpdateDestroyAPIView, ListAPIView
+from .serializers import AssignmentSerializer, SubmissionSerializer
+from rest_framework.generics import RetrieveUpdateDestroyAPIView, ListAPIView, CreateAPIView
 from django.db.models import Q
 
 
@@ -28,3 +28,11 @@ class PendingAssignmentsView(ListAPIView):
         ).distinct()
 
         return pending_assignments
+
+class SubmissionView(CreateAPIView):
+    serializer_class = SubmissionSerializer
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['assignment_pk'] = self.kwargs['assignment_pk']
+        return context
