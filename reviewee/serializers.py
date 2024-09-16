@@ -1,10 +1,17 @@
 from rest_framework import serializers
-from assignment.models import Submission, Assignment
+from assignment.models import Submission, Assignment, Subtask
 
 
 class AssignmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Assignment
+        fields = '__all__'
+
+
+
+class SubtaskSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Subtask
         fields = '__all__'
 
 
