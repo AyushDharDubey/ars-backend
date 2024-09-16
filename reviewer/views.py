@@ -17,6 +17,7 @@ from rest_framework.generics import (
     ListAPIView,
     RetrieveUpdateAPIView,
 )
+from django.shortcuts import get_object_or_404
 from django.db.models import Q
 from rest_framework.permissions import IsAuthenticated
 
@@ -52,10 +53,10 @@ class RetrieveUpdateAssignmentView(RetrieveUpdateAPIView):
 
     def retrieve(self, request, *args, **kwargs):
         response = super().retrieve(request, *args, **kwargs)
+        assignment = self.get_object()
+        subtasks = Subtask.objects.filter(assignment=assignment)
         response.data['subtasks'] = SubtaskSerializer(
-            Subtask.objects.filter(
-                assignment=kwargs['pk']
-            ),
+            subtasks,
             many=True,
         ).data
         return response
@@ -96,7 +97,10 @@ class ListSubmissionView(ListAPIView):
     serializer_class = SubmissionSerializer
 
     def get_queryset(self):
-        assignment = Assignment.objects.get(pk=self.kwargs['assignment_pk'])
+        assignment = get_object_or_404(
+            Assignment,
+            pk=self.kwargs['assignment_pk']
+        )
         submissions = Submission.objects.filter(
             assignment=assignment
         )

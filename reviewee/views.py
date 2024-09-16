@@ -22,16 +22,11 @@ class ListPendingAssignmentsView(ListAPIView):
     serializer_class = AssignmentSerializer
 
     def get_queryset(self):
-        assigned_to_user = Assignment.objects.filter(
+        return Assignment.objects.filter(
             Q(assigned_to=self.request.user) |
-            Q(assigned_to_teams__members=self.request.user)
+            Q(assigned_to_teams__members=self.request.user),
+            ~Q(submissions__reviews__status="Approved")
         ).distinct()
-        
-        pending_assignments = assigned_to_user.exclude(
-            submissions__reviews__status="Approved"
-        ).distinct()
-
-        return pending_assignments
 
 
 class RetrieveAssignmentView(RetrieveAPIView):
@@ -46,10 +41,10 @@ class RetrieveAssignmentView(RetrieveAPIView):
 
     def retrieve(self, request, *args, **kwargs):
         response = super().retrieve(request, *args, **kwargs)
+        assignment = self.get_object()
+        subtasks = Subtask.objects.filter(assignment=assignment)
         response.data['subtasks'] = SubtaskSerializer(
-            Subtask.objects.filter(
-                assignment=kwargs['pk']
-            ),
+            subtasks,
             many=True,
         ).data
         return response
