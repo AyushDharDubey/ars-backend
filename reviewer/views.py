@@ -4,6 +4,7 @@ from assignment.models import (
     Submission,
     Review,
 )
+from assignment.permissions import IsReviewer
 from .serializers import (
     SubtaskSerializer,
     CreateTeamSerializer,
@@ -17,17 +18,21 @@ from rest_framework.generics import (
     RetrieveUpdateAPIView,
 )
 from django.db.models import Q
+from rest_framework.permissions import IsAuthenticated
 
 
 class CreateTeamView(CreateAPIView):
+    permission_classes = [IsAuthenticated, IsReviewer]
     serializer_class = CreateTeamSerializer
 
 
 class CreateAssignmentView(CreateAPIView):
+    permission_classes = [IsAuthenticated, IsReviewer]
     serializer_class = AssignmentSerializer
 
 
 class ListAssignmentView(ListAPIView):
+    permission_classes = [IsAuthenticated, IsReviewer]
     serializer_class = AssignmentSerializer
 
     def get_queryset(self):
@@ -37,6 +42,7 @@ class ListAssignmentView(ListAPIView):
 
 
 class RetrieveUpdateAssignmentView(RetrieveUpdateAPIView):
+    permission_classes = [IsAuthenticated, IsReviewer]
     serializer_class = AssignmentSerializer
 
     def get_queryset(self):
@@ -55,6 +61,7 @@ class RetrieveUpdateAssignmentView(RetrieveUpdateAPIView):
         return response
 
 class CreateSubtaskView(CreateAPIView):
+    permission_classes = [IsAuthenticated, IsReviewer]
     serializer_class = SubtaskSerializer
 
     def get_serializer_context(self):
@@ -64,6 +71,7 @@ class CreateSubtaskView(CreateAPIView):
 
 
 class RetrieveUpdateSubtaskView(RetrieveUpdateAPIView):
+    permission_classes = [IsAuthenticated, IsReviewer]
     serializer_class = SubtaskSerializer
 
     def get_queryset(self):
@@ -74,6 +82,7 @@ class RetrieveUpdateSubtaskView(RetrieveUpdateAPIView):
 
 
 class CreateReviewView(CreateAPIView):
+    permission_classes = [IsAuthenticated, IsReviewer]
     serializer_class = ReviewSerializer
 
     def get_serializer_context(self):
@@ -83,6 +92,7 @@ class CreateReviewView(CreateAPIView):
 
 
 class ListSubmissionView(ListAPIView):
+    permission_classes = [IsAuthenticated, IsReviewer]
     serializer_class = SubmissionSerializer
 
     def get_queryset(self):
@@ -94,6 +104,7 @@ class ListSubmissionView(ListAPIView):
 
 
 class RetrieveUpdateReviewView(RetrieveUpdateAPIView):
+    permission_classes = [IsAuthenticated, IsReviewer]
     serializer_class = ReviewSerializer
 
     def get_queryset(self):

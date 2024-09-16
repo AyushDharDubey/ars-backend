@@ -1,10 +1,13 @@
 from assignment.models import Submission, Review, Assignment
+from assignment.permissions import IsReviewee
 from .serializers import AssignmentSerializer, SubmissionSerializer
 from rest_framework.generics import RetrieveUpdateDestroyAPIView, ListAPIView, CreateAPIView
+from rest_framework.permissions import IsAuthenticated
 from django.db.models import Q
 
 
 class ListAssignmentsView(ListAPIView):
+    permission_classes = [IsAuthenticated, IsReviewee]
     serializer_class = AssignmentSerializer
 
     def get_queryset(self):
@@ -15,6 +18,7 @@ class ListAssignmentsView(ListAPIView):
 
 
 class ListPendingAssignmentsView(ListAPIView):
+    permission_classes = [IsAuthenticated, IsReviewee]
     serializer_class = AssignmentSerializer
 
     def get_queryset(self):
@@ -30,6 +34,7 @@ class ListPendingAssignmentsView(ListAPIView):
         return pending_assignments
 
 class CreateSubmissionView(CreateAPIView):
+    permission_classes = [IsAuthenticated, IsReviewee]
     serializer_class = SubmissionSerializer
 
     def get_serializer_context(self):
