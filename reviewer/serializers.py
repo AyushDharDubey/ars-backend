@@ -3,6 +3,8 @@ from assignment.models import (
     Assignment,
     Subtask,
     Team,
+    Review,
+    Submission
 )
 from datetime import timezone
 from django.contrib.auth import get_user_model
@@ -48,5 +50,29 @@ class SubtaskSerializer(serializers.ModelSerializer):
         exclude = ['assignment']
 
     def create(self, validated_data):
-        validated_data['assignment'] = self.context.get('assignment_pk')
+        validated_data['assignment'] = Assignment.objects.get(
+            pk=self.context.get('assignment_pk')
+        )
         return super().create(validated_data)
+
+
+class ReviewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Review
+        fields = "__all__"
+        read_only_fields = ["submission", "reviewer", "created_at", "updated_at"]
+
+    def validate(self, attrs):
+        attrs['reviewer'] = self.context['view'].request.user
+        attrs['submission'] = Submission.objects.get(
+            pk=self.context.get('submission_pk')
+        )
+        if not attrs['submission'].assignment.reviewers.filter(id=attrs['reviewer'].id).exists():
+            raise serializers.ValidationError("You are not a reviewer for this assignment.")
+        return attrs
+
+
+class SubmissionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Submission
+        fields = "__all__"
