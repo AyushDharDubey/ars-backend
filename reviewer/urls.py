@@ -19,6 +19,6 @@ urlpatterns = [
     path('assignment/<int:assignment_pk>/create_subtask/', CreateSubtaskView.as_view()),
     path('assignment/<int:assignment_pk>/subtask/<int:pk>/', RetrieveUpdateSubtaskView.as_view()),
     path('assignment/<int:assignment_pk>/submissions/', ListSubmissionView.as_view()),
-    path('submission/<int:submission_pk>/review/', CreateReviewView.as_view()),
+    path('submission/<int:submission_pk>/create_review/', CreateReviewView.as_view()),
     path('submission/<int:submission_pk>/review/<int:pk>/', RetrieveUpdateReviewView.as_view()),
 ]
