@@ -41,7 +41,7 @@ class SubtaskSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         validated_data['assignment'] = Assignment.objects.get(
-            pk=self.context.get('assignment_pk')
+            pk=self.context['view'].kwargs.get('assignment_pk')
         )
         return super().create(validated_data)
 
@@ -117,7 +117,7 @@ class ReviewSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         attrs['reviewer'] = self.context['view'].request.user
         attrs['submission'] = Submission.objects.get(
-            pk=self.context.get('submission_pk')
+            pk=self.context['view'].kwargs.get('submission_pk')
         )
         if not attrs['submission'].assignment.reviewers.filter(id=attrs['reviewer'].id).exists():
             raise serializers.ValidationError("You are not a reviewer for this assignment.")

@@ -56,11 +56,6 @@ class CreateSubtaskView(CreateAPIView):
     permission_classes = [IsAuthenticated, IsReviewer]
     serializer_class = SubtaskSerializer
 
-    def get_serializer_context(self):
-        context = super().get_serializer_context()
-        context['assignment_pk'] = self.kwargs['assignment_pk']
-        return context
-
 
 class RetrieveUpdateSubtaskView(RetrieveUpdateAPIView):
     permission_classes = [IsAuthenticated, IsReviewer]
@@ -75,11 +70,6 @@ class RetrieveUpdateSubtaskView(RetrieveUpdateAPIView):
 class CreateReviewView(CreateAPIView):
     permission_classes = [IsAuthenticated, IsReviewer]
     serializer_class = ReviewSerializer
-
-    def get_serializer_context(self):
-        context = super().get_serializer_context()
-        context['submission_pk'] = self.kwargs['submission_pk']
-        return context
 
 
 class ListSubmissionView(ListAPIView):
