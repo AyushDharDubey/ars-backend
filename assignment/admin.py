@@ -4,7 +4,8 @@ from .models import (
     Subtask,
     Team,
     Submission,
-    Review
+    Review,
+    File
 )
 
 admin.site.register(Assignment)
@@ -12,3 +13,4 @@ admin.site.register(Subtask)
 admin.site.register(Team)
 admin.site.register(Submission)
 admin.site.register(Review)
+admin.site.register(File)
