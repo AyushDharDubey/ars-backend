@@ -68,9 +68,8 @@ class RetrieveUpdateSubtaskView(RetrieveUpdateAPIView):
 
     def get_queryset(self):
         return Subtask.objects.filter(
-            Q(assignment__assigned_to=self.request.user) |
-            Q(assignment__assigned_to_teams__members=self.request.user)
-        ).distinct()
+            Q(assignment__created_by=self.request.user)
+        )
 
 
 class CreateReviewView(CreateAPIView):
