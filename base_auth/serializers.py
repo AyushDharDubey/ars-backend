@@ -50,8 +50,8 @@ class ResetPasswordSerializer(serializers.Serializer):
 
 class AccountActivateSerializer(serializers.Serializer):
     username = serializers.CharField()
-    token = serializers.CharField(allow_blank=True)
-    otp = serializers.CharField(allow_blank=True)
+    token = serializers.CharField(allow_blank=True, required=False)
+    otp = serializers.CharField(allow_blank=True, required=False)
 
     def validate_username(self, username):
         try:
@@ -94,7 +94,7 @@ class SignupSerializer(serializers.ModelSerializer):
 
 
 class ChangePasswordSerializer(serializers.Serializer):
-    currect_password = serializers.CharField()
+    current_password = serializers.CharField()
 
     def validate_current_password(self, current_password):
         self.user = self.context.get('request').user
