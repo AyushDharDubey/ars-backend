@@ -2,11 +2,10 @@ from rest_framework import serializers
 from assignment.models import Submission, Assignment, Subtask, File
 
 
-class AssignmentSerializer(serializers.ModelSerializer):
+class FileSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Assignment
+        model = File
         fields = '__all__'
-
 
 
 class SubtaskSerializer(serializers.ModelSerializer):
@@ -15,11 +14,21 @@ class SubtaskSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class AssignmentSerializer(serializers.ModelSerializer):
+    subtasks = SubtaskSerializer(many=True, read_only=True)
+    files = FileSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Assignment
+        fields = '__all__'
+
+
 class SubmissionSerializer(serializers.ModelSerializer):
     attachments = serializers.ListField(
         child=serializers.FileField(allow_empty_file=True, use_url=False),
         required=False
     )
+    files = FileSerializer(many=True, read_only=True)
 
     class Meta:
         model = Submission

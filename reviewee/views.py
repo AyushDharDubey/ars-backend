@@ -39,16 +39,6 @@ class RetrieveAssignmentView(RetrieveAPIView):
             Q(assigned_to_teams__members=self.request.user)
         ).distinct()
 
-    def retrieve(self, request, *args, **kwargs):
-        response = super().retrieve(request, *args, **kwargs)
-        assignment = self.get_object()
-        subtasks = Subtask.objects.filter(assignment=assignment)
-        response.data['subtasks'] = SubtaskSerializer(
-            subtasks,
-            many=True,
-        ).data
-        return response
-
 
 class CreateSubmissionView(CreateAPIView):
     permission_classes = [IsAuthenticated, IsReviewee]

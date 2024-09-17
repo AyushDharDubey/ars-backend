@@ -12,16 +12,37 @@ from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
-class CreateTeamSerializer(serializers.ModelSerializer):
+class TeamSerializer(serializers.ModelSerializer):
     class Meta:
         model = Team
         fields = '__all__'
+
+
+class FileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = File
+        fields = '__all__'
+
+
+class SubtaskSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Subtask
+        exclude = ['assignment']
+
+    def create(self, validated_data):
+        validated_data['assignment'] = Assignment.objects.get(
+            pk=self.context.get('assignment_pk')
+        )
+        return super().create(validated_data)
+
 
 class AssignmentSerializer(serializers.ModelSerializer):
     attachments = serializers.ListField(
         child=serializers.FileField(allow_empty_file=True, use_url=False),
         required=False
     )
+    subtasks = SubtaskSerializer(many=True, read_only=True)
+    files = FileSerializer(many=True, read_only=True)
 
     class Meta:
         model = Assignment
@@ -53,18 +74,6 @@ class AssignmentSerializer(serializers.ModelSerializer):
             assignment.files.add(attachment)
 
         return assignment
-
-
-class SubtaskSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Subtask
-        exclude = ['assignment']
-
-    def create(self, validated_data):
-        validated_data['assignment'] = Assignment.objects.get(
-            pk=self.context.get('assignment_pk')
-        )
-        return super().create(validated_data)
 
 
 class ReviewSerializer(serializers.ModelSerializer):

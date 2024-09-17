@@ -7,7 +7,7 @@ from assignment.models import (
 from assignment.permissions import IsReviewer
 from .serializers import (
     SubtaskSerializer,
-    CreateTeamSerializer,
+    TeamSerializer,
     AssignmentSerializer,
     ReviewSerializer,
     SubmissionSerializer
@@ -24,7 +24,7 @@ from rest_framework.permissions import IsAuthenticated
 
 class CreateTeamView(CreateAPIView):
     permission_classes = [IsAuthenticated, IsReviewer]
-    serializer_class = CreateTeamSerializer
+    serializer_class = TeamSerializer
 
 
 class CreateAssignmentView(CreateAPIView):
@@ -51,15 +51,6 @@ class RetrieveUpdateAssignmentView(RetrieveUpdateAPIView):
             reviewers=self.request.user
         )
 
-    def retrieve(self, request, *args, **kwargs):
-        response = super().retrieve(request, *args, **kwargs)
-        assignment = self.get_object()
-        subtasks = Subtask.objects.filter(assignment=assignment)
-        response.data['subtasks'] = SubtaskSerializer(
-            subtasks,
-            many=True,
-        ).data
-        return response
 
 class CreateSubtaskView(CreateAPIView):
     permission_classes = [IsAuthenticated, IsReviewer]
