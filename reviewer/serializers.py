@@ -65,14 +65,15 @@ class AssignmentSerializer(serializers.ModelSerializer):
             attrs['reviewers'] = []
         if not self.user in attrs['reviewers']:
             attrs['reviewers'].append(self.user)
-        if attrs.get('assigned_to') is None:
-            attrs['assigned_to'] = []
-        if attrs.get('assigned_to_teams') is None:
-            attrs['assigned_to_teams'] = []
-        if len(attrs['assigned_to'])==0 and len(attrs['assigned_to_teams']==0):
-            raise serializers.ValidationError(
-                'Assignment must be assigned to either individuals or teams.'
-            )
+        if not self.partial:
+            if attrs.get('assigned_to') is None:
+                attrs['assigned_to'] = []
+            if attrs.get('assigned_to_teams') is None:
+                attrs['assigned_to_teams'] = []
+            if len(attrs['assigned_to'])==0 and len(attrs['assigned_to_teams'])==0:
+                raise serializers.ValidationError(
+                    'Assignment must be assigned to either individuals or teams.'
+                )
         return attrs
     
     def validate_assigned_to(self, users):
