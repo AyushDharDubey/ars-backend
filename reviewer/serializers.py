@@ -7,7 +7,8 @@ from assignment.models import (
     Submission,
     File
 )
-from datetime import timezone
+from django.utils import timezone
+from django.contrib.auth.models import Group
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
@@ -16,6 +17,15 @@ class TeamSerializer(serializers.ModelSerializer):
     class Meta:
         model = Team
         fields = '__all__'
+    
+    def validate_members(self, members):
+        reviewee_group = Group.objects.get(name='Reviewee')
+        
+        for member in members:
+            if not reviewee_group in member.groups.all():
+                raise serializers.ValidationError(f"User {member.username} must be a Reviewee.")
+        
+        return members
 
 
 class FileSerializer(serializers.ModelSerializer):
@@ -47,7 +57,7 @@ class AssignmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Assignment
         fields = '__all__'
-        read_only_fields = ['created_by', ]
+        read_only_fields = ['created_by', 'created_at', 'updated_at']
     
     def validate(self, attrs):
         self.user = self.context['view'].request.user
@@ -61,12 +71,33 @@ class AssignmentSerializer(serializers.ModelSerializer):
             attrs['assigned_to_teams'] = []
         if len(attrs['assigned_to'])==0 and len(attrs['assigned_to_teams']==0):
             raise serializers.ValidationError(
-                'at least one of assigned_to or assigned_to_teams parameter is required'
+                'Assignment must be assigned to either individuals or teams.'
             )
         return attrs
+    
+    def validate_assigned_to(self, users):
+        reviewee_group = Group.objects.get(name='Reviewee')
+        for user in users:
+            if not reviewee_group in user.groups.all():
+                raise serializers.ValidationError(f"User {user.username} must be a Reviewee.")
+        return users
+    
+    def validate_due_date(self, due_date):
+        if due_date <= timezone.now():
+            raise serializers.ValidationError("Due date must be a future date.")
+        return due_date
+    
+    def validate_reviewers(self, reviewers):
+        reviewer_group = Group.objects.get(name='Reviewer')
+        for user in reviewers:
+            if not reviewer_group in user.groups.all():
+                raise serializers.ValidationError(f"User {user.username} must be a Reviewer.")
+        return reviewers
+        
 
     def create(self, validated_data):
         attachments = validated_data.pop('attachments', [])
+        validated_data['created_by'] = self.context['request'].user
         assignment = super().create(validated_data)
 
         for file in attachments:
