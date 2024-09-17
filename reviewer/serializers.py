@@ -93,6 +93,9 @@ class ReviewSerializer(serializers.ModelSerializer):
 
 
 class SubmissionSerializer(serializers.ModelSerializer):
+    files = FileSerializer(many=True, read_only=True)
+    reviews = ReviewSerializer(many=True, read_only=True)
+
     class Meta:
         model = Submission
         fields = "__all__"

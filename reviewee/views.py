@@ -1,7 +1,7 @@
-from assignment.models import Subtask, Review, Assignment
+from assignment.models import Submission, Assignment
 from assignment.permissions import IsReviewee
 from .serializers import AssignmentSerializer, SubmissionSerializer, SubtaskSerializer
-from rest_framework.generics import RetrieveAPIView, ListAPIView, CreateAPIView
+from rest_framework.generics import RetrieveAPIView, ListAPIView, CreateAPIView, RetrieveUpdateAPIView
 from rest_framework.permissions import IsAuthenticated
 from django.db.models import Q
 
@@ -48,3 +48,24 @@ class CreateSubmissionView(CreateAPIView):
         context = super().get_serializer_context()
         context['assignment_pk'] = self.kwargs['assignment_pk']
         return context
+
+
+class ListSubmissionsView(ListAPIView):
+    permission_classes = [IsAuthenticated, IsReviewee]
+    serializer_class = SubmissionSerializer
+
+    def get_queryset(self):
+        return Submission.objects.filter(
+            Q(submitted_by=self.request.user),
+            Q(assignment=self.kwargs.get('assignment_pk'))
+        )
+
+class RetrieveUpdateSubmissionView(RetrieveUpdateAPIView):
+    permission_classes = [IsAuthenticated, IsReviewee]
+    serializer_class = SubmissionSerializer
+
+    def get_queryset(self):
+        return Submission.objects.filter(
+            Q(submitted_by=self.request.user),
+            Q(assignment=self.kwargs.get('assignment_pk'))
+        )

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from assignment.models import Submission, Assignment, Subtask, File
+from assignment.models import Submission, Assignment, Subtask, File, Review
 
 
 class FileSerializer(serializers.ModelSerializer):
@@ -23,12 +23,19 @@ class AssignmentSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class ReviewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Review
+        fields = '__all__'
+
+
 class SubmissionSerializer(serializers.ModelSerializer):
     attachments = serializers.ListField(
         child=serializers.FileField(allow_empty_file=True, use_url=False),
         required=False
     )
     files = FileSerializer(many=True, read_only=True)
+    reviews = ReviewSerializer(many=True, read_only=True)
 
     class Meta:
         model = Submission
