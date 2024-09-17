@@ -4,7 +4,8 @@ from assignment.models import (
     Subtask,
     Team,
     Review,
-    Submission
+    Submission,
+    File
 )
 from datetime import timezone
 from django.contrib.auth import get_user_model
@@ -17,6 +18,11 @@ class CreateTeamSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class AssignmentSerializer(serializers.ModelSerializer):
+    attachments = serializers.ListField(
+        child=serializers.FileField(allow_empty_file=True, use_url=False),
+        required=False
+    )
+
     class Meta:
         model = Assignment
         fields = '__all__'
@@ -37,11 +43,16 @@ class AssignmentSerializer(serializers.ModelSerializer):
                 'at least one of assigned_to or assigned_to_teams parameter is required'
             )
         return attrs
-        return attrs
 
     def create(self, validated_data):
-        validated_data['created_by'] = self.user
-        return super().create(validated_data)
+        attachments = validated_data.pop('attachments', [])
+        assignment = super().create(validated_data)
+
+        for file in attachments:
+            attachment = File.objects.create(file=file)
+            assignment.files.add(attachment)
+
+        return assignment
 
 
 class SubtaskSerializer(serializers.ModelSerializer):

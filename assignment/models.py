@@ -1,7 +1,13 @@
 from django.db import models
 from django.contrib.auth import get_user_model
+import uuid, os
 
 User = get_user_model()
+
+def upload_to(attachment, filename):
+    ext = filename.split('.')[-1]
+    filename = f'{uuid.uuid4()}.{ext}'
+    return os.path.join('uploads/', filename)
 
 
 class Team(models.Model):
@@ -10,10 +16,15 @@ class Team(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
 
+class File(models.Model):
+    file = models.FileField(upload_to=upload_to)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
 class Assignment(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField()
-    file = models.FileField(upload_to="uploads/assignment/", blank=True, null=True)
+    files = models.ManyToManyField(File, blank=True)
     due_date = models.DateTimeField()
     assigned_to = models.ManyToManyField(User, blank=True, related_name="reviewee_assignments")
     assigned_to_teams = models.ManyToManyField(Team, blank=True, related_name="assignments")
@@ -49,7 +60,7 @@ class Submission(models.Model):
         User, on_delete=models.SET_NULL, null=True, related_name="submissions"
     )
     is_group_submission = models.BooleanField(default=False)
-    file = models.FileField(upload_to="uploads/submissions/", blank=True, null=True)
+    files = models.ManyToManyField(File, blank=True)
     description = models.TextField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from assignment.models import Submission, Assignment, Subtask
+from assignment.models import Submission, Assignment, Subtask, File
 
 
 class AssignmentSerializer(serializers.ModelSerializer):
@@ -16,6 +16,11 @@ class SubtaskSerializer(serializers.ModelSerializer):
 
 
 class SubmissionSerializer(serializers.ModelSerializer):
+    attachments = serializers.ListField(
+        child=serializers.FileField(allow_empty_file=True, use_url=False),
+        required=False
+    )
+
     class Meta:
         model = Submission
         fields = '__all__'
@@ -31,3 +36,13 @@ class SubmissionSerializer(serializers.ModelSerializer):
         else:
             raise serializers.ValidationError(f"Assignment {attrs['assignment'].title} not assigned to you.")
         return attrs
+
+    def create(self, validated_data):
+        attachments = validated_data.pop('attachments', [])
+        assignment = super().create(validated_data)
+
+        for file in attachments:
+            attachment = File.objects.create(file=file)
+            assignment.files.add(attachment)
+
+        return assignment
