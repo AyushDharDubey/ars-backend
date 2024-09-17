@@ -2,9 +2,10 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 from django.contrib.auth import get_user_model
-from assignment.models import Assignment, Subtask, Review, Submission
+from assignment.models import Assignment, Subtask, Review, Submission, File
 from django.utils import timezone
 from django.contrib.auth.models import Group
+from django.core.files.uploadedfile import SimpleUploadedFile
 
 User = get_user_model()
 
@@ -29,6 +30,10 @@ class AssignmentTestCase(APITestCase):
         )
         self.assignment.reviewers.add(self.reviewer)
 
+        self.test_file = SimpleUploadedFile(
+            "test_file.pdf", b"This is a test file content", content_type="application/pdf"
+        )
+
     def test_create_assignment(self):
         self.client.force_authenticate(user=self.reviewer)
         url = reverse('reviewer-create-assignment')
@@ -36,11 +41,38 @@ class AssignmentTestCase(APITestCase):
             'title': 'New Assignment',
             'description': 'New Assignment Description',
             'due_date': timezone.now() + timezone.timedelta(days=10),
-            'assigned_to': [self.reviewee.id, ]
+            'assigned_to': [self.reviewee.id, ],
+            'attachments': [self.test_file, ]
         }
-        response = self.client.post(url, data, format='json')
+        response = self.client.post(url, data, format='multipart', HTTP_ACCEPT='application/json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Assignment.objects.count(), 2)
+    
+    def test_create_assignment_invalid_due_date(self):
+        self.client.force_authenticate(user=self.reviewer)
+        url = reverse('reviewer-create-assignment')
+        data = {
+            'title': 'Invalid Assignment',
+            'description': 'New Assignment Description',
+            'due_date': timezone.now() - timezone.timedelta(days=10),
+            'assigned_to': [self.reviewee.id, ],
+        }
+        response = self.client.post(url, data, format='multipart', HTTP_ACCEPT='application/json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(Assignment.objects.count(), 1)
+    
+    def test_create_assignment_assigned_to_non_reviewee(self):
+        self.client.force_authenticate(user=self.reviewer)
+        url = reverse('reviewer-create-assignment')
+        data = {
+            'title': 'Invalid Assignment',
+            'description': 'Assignment Description',
+            'due_date': timezone.now() + timezone.timedelta(days=10),
+            'assigned_to': [self.reviewer.id, ],
+        }
+        response = self.client.post(url, data, format='multipart', HTTP_ACCEPT='application/json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(Assignment.objects.count(), 1)
 
     def test_list_assignments(self):
         self.client.force_authenticate(user=self.reviewer)
