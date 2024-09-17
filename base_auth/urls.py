@@ -1,7 +1,13 @@
 from django.urls import path
 from rest_framework_simplejwt.views import TokenRefreshView
 from .views import (
-    SignupAPIView, AccountActivateView, ResetPasswordView, ChangePasswordView, LogoutView, LoginView
+    SignupAPIView,
+    AccountActivateView,
+    ResetPasswordView,
+    ChangePasswordView,
+    LogoutView,
+    LoginView,
+    Oauth2ChanneliView
 )
 
 urlpatterns = [
@@ -12,4 +18,5 @@ urlpatterns = [
     path('reset_password/', ResetPasswordView.as_view(), name='reset-password'),
     path('change_password/', ChangePasswordView.as_view(), name='change-password'),
     path('logout/', LogoutView.as_view(), name='logout'),
+    path('oauth2/channeli/callback/', Oauth2ChanneliView.as_view(), name='oauth2-channeli-callback'),
 ]

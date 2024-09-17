@@ -2,9 +2,16 @@ from django.contrib.auth.models import Group
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
-from .serializers import SignupSerializer, LoginSerializer, ResetPasswordSerializer, AccountActivateSerializer, ChangePasswordSerializer
+from .serializers import (
+    SignupSerializer,
+    LoginSerializer,
+    ResetPasswordSerializer,
+    AccountActivateSerializer,
+    ChangePasswordSerializer,
+    Oauth2ChanneliSerializer,
+    ChanneliUserSerializer
+)
 from .models import User
-from django.contrib.auth import authenticate
 from rest_framework.permissions import IsAuthenticated
 from .utils import send_password_reset, send_account_activation
 from rest_framework.generics import GenericAPIView
@@ -38,7 +45,7 @@ class LoginView(GenericAPIView):
                 'refresh': str(refresh_token),
                 'access': str(access_token)
             }
-            return Response(content, status=status.HTTP_201_CREATED)
+            return Response(content, status=status.HTTP_200_OK)
         else:
             return Response(
                 data={
@@ -229,3 +236,47 @@ class AccountActivateView(GenericAPIView):
                 },
                 status=status.HTTP_400_BAD_REQUEST
             )
+
+
+class Oauth2ChanneliView(GenericAPIView):
+    permission_classes = []
+    serializer_class = Oauth2ChanneliSerializer
+
+    def get(self, request):
+        serializer = self.get_serializer(data=request.GET)
+        if not serializer.is_valid():
+            return Response(
+                data={
+                    'errors': serializer.errors,
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        user_info = serializer.validated_data['user_info']
+        role = serializer.validated_data['state']
+        data= {
+            'username': user_info.get('username'),
+            'first_name': user_info.get('person').get('fullName'),
+            'email': user_info.get('contactInformation').get('emailAddress'),
+            'registration_method': 'channel i',
+            'is_active': True,
+        }
+        user_seriallizer = ChanneliUserSerializer(data=data)
+        if not user_seriallizer.is_valid():
+            return Response(
+                data={
+                    'errors': user_seriallizer.errors,
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        user = user_seriallizer.save()
+        group = Group.objects.get(name=role)
+        user.groups.add(group)
+        refresh_token = RefreshToken.for_user(user)
+        access_token = AccessToken.for_user(user)
+        return Response(
+            data={
+                'access_token': str(access_token),
+                'refresh_token': str(refresh_token)
+            },
+            status=status.HTTP_200_OK
+        )

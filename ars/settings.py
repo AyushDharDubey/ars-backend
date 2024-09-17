@@ -140,3 +140,9 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Channel i credentials
+
+CHANNELI_CLIENT_ID = os.environ.get('CHANNELI_CLIENT_ID')
+CHANNELI_CLIENT_SECRET = os.environ.get('CHANNELI_CLIENT_SECRET')
+BACKEND_BASE_URL = os.environ.get('BACKEND_BASE_URL')

@@ -1,9 +1,10 @@
 from django.contrib.auth.tokens import default_token_generator
-from django.contrib.auth import authenticate
+from django.contrib.auth import authenticate, get_user_model
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import PasswordField
 from .utils import send_account_activation
-from django.contrib.auth import get_user_model
+from django.conf import settings
+import requests
 
 User = get_user_model()
 
@@ -102,3 +103,40 @@ class ChangePasswordSerializer(serializers.Serializer):
         if not auth:
             raise serializers.ValidationError('Wrong password')
         return current_password
+
+
+class ChanneliUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['username', 'email', 'first_name', 'registration_method', 'is_active']
+    def create(self, validated_data):
+        user = User(**validated_data)
+        user.save()
+        return user
+
+
+class Oauth2ChanneliSerializer(serializers.Serializer):
+    code = serializers.CharField()
+    state = serializers.CharField()
+
+    def validate(self, attrs):
+        if attrs['state'] not in ["Reviewee", "Reviewer"]:
+            raise serializers.ValidationError('Invalid role')
+        payload = {
+            'client_id':settings.CHANNELI_CLIENT_ID,
+            'client_secret':settings.CHANNELI_CLIENT_SECRET,
+            'grant_type':'authorization_code',
+            'redirect_uri': settings.BACKEND_BASE_URL + 'auth/oauth2_channeli/callback/',
+            'code': attrs['code'],
+        }
+        response = requests.post('https://channeli.in/open_auth/token/', data=payload)
+        if response.status_code != 200:
+            raise serializers.ValidationError(response.json()['error'])
+        access_token = response.json()['access_token']
+        token_type = response.json()['token_type']
+        response = requests.get('https://channeli.in/open_auth/get_user_data/', headers={"Authorization": f"{token_type} {access_token}"})
+        if response.status_code != 200:
+            raise serializers.ValidationError(response.json()['error'])
+        user_info = response.json()
+        attrs.update({'user_info': user_info})
+        return attrs
