@@ -46,6 +46,7 @@ class AssignmentTestCase(APITestCase):
         }
         response = self.client.post(url, data, format='multipart', HTTP_ACCEPT='application/json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(len(response.json()['files']), 1)
         self.assertEqual(Assignment.objects.count(), 2)
     
     def test_create_assignment_invalid_due_date(self):
