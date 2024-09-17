@@ -4,7 +4,7 @@ from rest_framework import status
 from django.contrib.auth.models import Group
 from django.contrib.auth import get_user_model
 from rest_framework_simplejwt.tokens import RefreshToken
-from django.contrib.auth.tokens import default_token_generator
+from django.core.cache import cache
 
 User = get_user_model()
 
@@ -86,6 +86,7 @@ class AuthenticationTests(APITestCase):
         response = self.client.get(url, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data, 'Email sent successfully')
+        cache.clear()
 
     def test_account_activation_already_active(self):
         self.user.is_active = True
@@ -140,6 +141,7 @@ class AuthenticationTests(APITestCase):
         }
         response = self.client.get(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        cache.clear()
 
     def test_reset_password_invalid_username(self):
         url = reverse('reset-password')
