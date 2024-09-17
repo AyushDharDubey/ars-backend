@@ -5,6 +5,7 @@ from django.contrib.auth import get_user_model
 from assignment.models import Assignment, Subtask, Review, Submission
 from django.utils import timezone
 from django.contrib.auth.models import Group
+from django.core.files.uploadedfile import SimpleUploadedFile
 
 User = get_user_model()
 
@@ -30,6 +31,10 @@ class RevieweeAssignmentTestCase(APITestCase):
         self.assignment.reviewers.add(self.reviewer)
         self.assignment.assigned_to.add(self.reviewee)
 
+        self.test_file = SimpleUploadedFile(
+            "test_file.pdf", b"This is a test file content", content_type="application/pdf"
+        )
+
     def test_list_assignments(self):
         self.client.force_authenticate(user=self.reviewee)
         url = reverse('reviewee-list-assignments')
@@ -37,6 +42,37 @@ class RevieweeAssignmentTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)
         self.assertEqual(response.data[0]['title'], "Test Assignment for Reviewee")
+
+    def test_pending_assignments(self):
+        self.client.force_authenticate(user=self.reviewee)
+        url = reverse('reviewee-pending-assignments')
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]['title'], "Test Assignment for Reviewee")
+
+        submission_url = reverse('reviewee-create-submission', args=[self.assignment.id])
+        submission_data = {
+            'description': 'My Submission',
+            'attachments': [self.test_file]
+        }
+        submission_response = self.client.post(submission_url, submission_data, format='multipart', HTTP_ACCEPT='application/json')
+        self.assertEqual(submission_response.status_code, status.HTTP_201_CREATED)
+        
+        submission_id = submission_response.data['id']
+        self.client.force_authenticate(user=self.reviewer)
+        review_url = reverse('reviewer-create-review', args=[submission_id])
+        review_data = {
+            'comments': 'Good work',
+            'status': 'Approved'
+        }
+        review_response = self.client.post(review_url, review_data, format='json')
+        self.assertEqual(review_response.status_code, status.HTTP_201_CREATED)
+
+        self.client.force_authenticate(user=self.reviewee)
+        response_after_review = self.client.get(url, format='json')
+        self.assertEqual(response_after_review.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response_after_review.data), 0)
 
     def test_retrieve_assignment(self):
         self.client.force_authenticate(user=self.reviewee)
