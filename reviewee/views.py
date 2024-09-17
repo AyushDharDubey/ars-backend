@@ -55,9 +55,10 @@ class ListSubmissionsView(ListAPIView):
     serializer_class = SubmissionSerializer
 
     def get_queryset(self):
+        assignment = Assignment.objects.get(pk=self.kwargs.get('assignment_pk'))
         return Submission.objects.filter(
             Q(submitted_by=self.request.user),
-            Q(assignment=self.kwargs.get('assignment_pk'))
+            Q(assignment=assignment)
         )
 
 class RetrieveUpdateSubmissionView(RetrieveUpdateAPIView):
@@ -65,7 +66,8 @@ class RetrieveUpdateSubmissionView(RetrieveUpdateAPIView):
     serializer_class = SubmissionSerializer
 
     def get_queryset(self):
+        assignment = Assignment.objects.get(pk=self.kwargs.get('assignment_pk'))
         return Submission.objects.filter(
             Q(submitted_by=self.request.user),
-            Q(assignment=self.kwargs.get('assignment_pk'))
+            Q(assignment=assignment)
         )

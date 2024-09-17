@@ -44,7 +44,7 @@ class SubmissionSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         attrs['submitted_by'] = self.context['request'].user
-        attrs['assignment'] = Assignment.objects.get(pk=self.context.get('assignment_pk'))
+        attrs['assignment'] = Assignment.objects.get(pk=self.context['view'].kwargs.get('assignment_pk'))
         if attrs['assignment'].assigned_to.filter(id=attrs['submitted_by'].id).exists():
             attrs['is_group_submission'] = False
         elif attrs['assignment'].assigned_to_teams.filter(members__id=attrs['submitted_by'].id).exists():
