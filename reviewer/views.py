@@ -3,6 +3,7 @@ from assignment.models import (
     Assignment,
     Submission,
     Review,
+    Team
 )
 from assignment.permissions import IsReviewer
 from .serializers import (
@@ -17,12 +18,16 @@ from rest_framework.generics import (
     CreateAPIView,
     ListAPIView,
     RetrieveUpdateAPIView,
+    RetrieveUpdateDestroyAPIView,
 )
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
+import json
+from rest_framework import status
+from rest_framework.response import Response
 
 
 User = get_user_model()
@@ -42,9 +47,41 @@ class CreateTeamView(CreateAPIView):
     serializer_class = TeamSerializer
 
 
+class ListTeamView(ListAPIView):
+    permission_classes = [IsAuthenticated, IsReviewer]
+    serializer_class = TeamSerializer
+    queryset = Team.objects.all()
+
+
+class RetrieveUpdateDestroyTeamView(RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsAuthenticated, IsReviewer]
+    serializer_class = TeamSerializer
+
+
 class CreateAssignmentView(CreateAPIView):
     permission_classes = [IsAuthenticated, IsReviewer]
     serializer_class = AssignmentSerializer
+
+    def post(self, request, *args, **kwargs):
+        data = request.data.copy()
+        subtasks = data.pop('subtasks', '[]')
+        assignment_serializer = self.get_serializer(data=data)
+        assignment_serializer.is_valid(raise_exception=True)
+        assignment_obj = assignment_serializer.save()
+        assignment = assignment_serializer.data
+        try:
+            subtasks = [{**json.loads(subtask), 'assignment': assignment_obj.pk} for subtask in subtasks]
+        except json.JSONDecodeError:
+            return Response(
+                {"subtasks": ["Invalid format. Must be a valid JSON array."]},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        subtask_serializer = SubtaskSerializer(data=subtasks, many=True)
+        subtask_serializer.is_valid(raise_exception=True)
+        subtask_serializer.save()
+        assignment['subtasks'] = subtask_serializer.data
+        headers = self.get_success_headers(assignment)
+        return Response(assignment, status=status.HTTP_201_CREATED, headers=headers)
 
 
 class ListAssignmentView(ListAPIView):
@@ -65,11 +102,6 @@ class RetrieveUpdateAssignmentView(RetrieveUpdateAPIView):
         return Assignment.objects.filter(
             reviewers=self.request.user
         )
-
-
-class CreateSubtaskView(CreateAPIView):
-    permission_classes = [IsAuthenticated, IsReviewer]
-    serializer_class = SubtaskSerializer
 
 
 class RetrieveUpdateSubtaskView(RetrieveUpdateAPIView):
