@@ -9,12 +9,21 @@ from .serializers import (
     AccountActivateSerializer,
     ChangePasswordSerializer,
     Oauth2ChanneliSerializer,
-    ChanneliUserSerializer
+    ChanneliUserSerializer,
+    ProfileSerializer,
 )
 from .models import User
 from rest_framework.permissions import IsAuthenticated
 from .utils import send_password_reset, send_account_activation
-from rest_framework.generics import GenericAPIView
+from rest_framework.generics import GenericAPIView, RetrieveAPIView
+
+
+class ProfileView(RetrieveAPIView):
+    serializer_class = ProfileSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        return self.request.user
 
 
 class LoginView(GenericAPIView):
@@ -43,7 +52,10 @@ class LoginView(GenericAPIView):
             access_token = AccessToken.for_user(user)
             content = {
                 'refresh': str(refresh_token),
-                'access': str(access_token)
+                'access': str(access_token),
+                'id': user.id,
+                'username': user.username,
+                'email': user.email
             }
             return Response(content, status=status.HTTP_200_OK)
         else:

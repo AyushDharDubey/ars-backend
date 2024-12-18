@@ -7,7 +7,8 @@ from .views import (
     ChangePasswordView,
     LogoutView,
     LoginView,
-    Oauth2ChanneliView
+    Oauth2ChanneliView,
+    ProfileView,
 )
 
 urlpatterns = [
@@ -19,4 +20,5 @@ urlpatterns = [
     path('change_password/', ChangePasswordView.as_view(), name='change-password'),
     path('logout/', LogoutView.as_view(), name='logout'),
     path('oauth2/channeli/callback/', Oauth2ChanneliView.as_view(), name='oauth2-channeli-callback'),
+    path('profile/', ProfileView.as_view(), name='who-am-i'),
 ]

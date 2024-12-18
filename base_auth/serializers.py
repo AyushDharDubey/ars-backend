@@ -8,6 +8,15 @@ import requests
 
 User = get_user_model()
 
+class ProfileSerializer(serializers.ModelSerializer):
+    roles = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = ['username', 'email', 'first_name', 'last_name', 'roles']
+    
+    def get_roles(self, obj):
+        return [group.name for group in obj.groups.all()]
 
 class LoginSerializer(serializers.Serializer):
     user = None
