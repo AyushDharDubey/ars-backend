@@ -36,11 +36,16 @@ class SubmissionSerializer(serializers.ModelSerializer):
     )
     files = FileSerializer(many=True, read_only=True)
     reviews = ReviewSerializer(many=True, read_only=True)
+    status = serializers.SerializerMethodField()
 
     class Meta:
         model = Submission
         fields = '__all__'
         read_only_fields = ['submitted_by', 'assignment', 'is_group_submission']
+
+    def get_status(self, obj):
+        latest_review = obj.reviews.order_by('-created_at').first()
+        return latest_review.status if latest_review else 'Pending'
 
     def validate(self, attrs):
         attrs['submitted_by'] = self.context['request'].user
