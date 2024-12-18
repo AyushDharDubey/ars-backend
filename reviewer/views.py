@@ -10,7 +10,8 @@ from .serializers import (
     TeamSerializer,
     AssignmentSerializer,
     ReviewSerializer,
-    SubmissionSerializer
+    SubmissionSerializer,
+    RevieweeSerializer
 )
 from rest_framework.generics import (
     CreateAPIView,
@@ -20,6 +21,20 @@ from rest_framework.generics import (
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
 from rest_framework.permissions import IsAuthenticated
+from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Group
+
+
+User = get_user_model()
+
+class ListRevieweeView(ListAPIView):
+    permission_classes = [IsAuthenticated, IsReviewer]
+    serializer_class = RevieweeSerializer
+
+    def get_queryset(self):
+        return User.objects.filter(
+            groups=Group.objects.get(name='Reviewee')
+        )
 
 
 class CreateTeamView(CreateAPIView):

@@ -9,9 +9,11 @@ from .views import (
     CreateReviewView,
     ListSubmissionView,
     RetrieveUpdateReviewView,
+    ListRevieweeView
 )
 
 urlpatterns = [
+    path('list_reviewees/', ListRevieweeView.as_view(), name='list-reviewees'),
     path('create_team/', CreateTeamView.as_view(), name='reviewer-create-team'),
     path('create_assignment/', CreateAssignmentView.as_view(), name='reviewer-create-assignment'),
     path('assignments/', ListAssignmentView.as_view(), name='reviewer-list-assignments'),

@@ -13,6 +13,13 @@ from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
+class RevieweeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        read_only_fields = ['id', 'username']
+        fields = ['id', 'username']
+
+
 class TeamSerializer(serializers.ModelSerializer):
     class Meta:
         model = Team
