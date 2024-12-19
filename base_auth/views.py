@@ -8,8 +8,7 @@ from .serializers import (
     ResetPasswordSerializer,
     AccountActivateSerializer,
     ChangePasswordSerializer,
-    Oauth2ChanneliSerializer,
-    ChanneliUserSerializer,
+    OauthChanneliSerializer,
     ProfileSerializer,
 )
 from .models import User
@@ -51,8 +50,8 @@ class LoginView(GenericAPIView):
             refresh_token = RefreshToken.for_user(user)
             access_token = AccessToken.for_user(user)
             content = {
-                'refresh': str(refresh_token),
-                'access': str(access_token),
+                'refresh_token': str(refresh_token),
+                'access_token': str(access_token),
                 'id': user.id,
                 'username': user.username,
                 'email': user.email
@@ -196,8 +195,8 @@ class SignupAPIView(GenericAPIView):
             refresh_token = RefreshToken.for_user(user)
             access_token = AccessToken.for_user(user)
             content={
-                'refresh': str(refresh_token),
-                'access': str(access_token)
+                'refresh_token': str(refresh_token),
+                'access_token': str(access_token)
             }
             return Response(content, status=status.HTTP_201_CREATED)
         else:
@@ -250,9 +249,9 @@ class AccountActivateView(GenericAPIView):
             )
 
 
-class Oauth2ChanneliView(GenericAPIView):
+class OauthChanneliView(GenericAPIView):
     permission_classes = []
-    serializer_class = Oauth2ChanneliSerializer
+    serializer_class = OauthChanneliSerializer
 
     def get(self, request):
         serializer = self.get_serializer(data=request.GET)
@@ -265,24 +264,29 @@ class Oauth2ChanneliView(GenericAPIView):
             )
         user_info = serializer.validated_data['user_info']
         role = serializer.validated_data['state']
-        data= {
-            'username': user_info.get('username'),
-            'first_name': user_info.get('person').get('fullName'),
-            'email': user_info.get('contactInformation').get('emailAddress'),
-            'registration_method': 'channel i',
-            'is_active': True,
-        }
-        user_seriallizer = ChanneliUserSerializer(data=data)
-        if not user_seriallizer.is_valid():
-            return Response(
-                data={
-                    'errors': user_seriallizer.errors,
-                },
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        user = user_seriallizer.save()
+        username = user_info.get('username')
+        email = user_info.get('contactInformation').get('emailAddress')
+
+        user, created = User.objects.update_or_create(
+            username=username,
+            defaults={
+                'first_name': user_info.get('person').get('fullName'),
+                'email': email,
+                'registration_method': 'channel i',
+                'is_active': True,
+            }
+        )
+
+        if not created:
+            if User.objects.filter(email=email).exclude(username=username).exists():
+                return Response(
+                    data={'errors': 'Another user with this email already exists.'},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
         group = Group.objects.get(name=role)
         user.groups.add(group)
+
         refresh_token = RefreshToken.for_user(user)
         access_token = AccessToken.for_user(user)
         return Response(

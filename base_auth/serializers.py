@@ -114,17 +114,23 @@ class ChangePasswordSerializer(serializers.Serializer):
         return current_password
 
 
-class ChanneliUserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ['username', 'email', 'first_name', 'registration_method', 'is_active']
-    def create(self, validated_data):
-        user = User(**validated_data)
-        user.save()
-        return user
+# class ChanneliUserSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = User
+#         fields = ['username', 'email', 'first_name', 'registration_method', 'is_active']
+
+#     def create(self, validated_data):
+#         user, created = User.objects.update_or_create(
+#             username = validated_data['username'],
+#             defaults = {
+#                 "first_name": validated_data['first_name'],
+#             }
+#         )
+#         print(validated_data)
+#         return user
 
 
-class Oauth2ChanneliSerializer(serializers.Serializer):
+class OauthChanneliSerializer(serializers.Serializer):
     code = serializers.CharField()
     state = serializers.CharField()
 
@@ -135,7 +141,7 @@ class Oauth2ChanneliSerializer(serializers.Serializer):
             'client_id':settings.CHANNELI_CLIENT_ID,
             'client_secret':settings.CHANNELI_CLIENT_SECRET,
             'grant_type':'authorization_code',
-            'redirect_uri': settings.BACKEND_BASE_URL + 'auth/oauth2_channeli/callback/',
+            'redirect_uri': settings.FRONTEND_BASE_URL + 'auth/oauth/channeli/callback/',
             'code': attrs['code'],
         }
         response = requests.post('https://channeli.in/open_auth/token/', data=payload)

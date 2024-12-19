@@ -7,7 +7,7 @@ from .views import (
     ChangePasswordView,
     LogoutView,
     LoginView,
-    Oauth2ChanneliView,
+    OauthChanneliView,
     ProfileView,
 )
 
@@ -19,6 +19,6 @@ urlpatterns = [
     path('reset_password/', ResetPasswordView.as_view(), name='reset-password'),
     path('change_password/', ChangePasswordView.as_view(), name='change-password'),
     path('logout/', LogoutView.as_view(), name='logout'),
-    path('oauth2/channeli/callback/', Oauth2ChanneliView.as_view(), name='oauth2-channeli-callback'),
+    path('oauth/channeli/callback/', OauthChanneliView.as_view(), name='oauth-channeli-callback'),
     path('profile/', ProfileView.as_view(), name='who-am-i'),
 ]
