@@ -11,9 +11,25 @@ def upload_to(attachment, filename):
 
 
 class Team(models.Model):
+    name = models.CharField(max_length=255)
     members = models.ManyToManyField(User, related_name="teams")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.name}"
+
+
+class Message(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='messages')
+    content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.user.username}: {self.content[:20]}"
+
 
 
 class File(models.Model):

@@ -5,7 +5,8 @@ from .models import (
     Team,
     Submission,
     Review,
-    File
+    File,
+    Message
 )
 
 admin.site.register(Assignment)
@@ -14,3 +15,4 @@ admin.site.register(Team)
 admin.site.register(Submission)
 admin.site.register(Review)
 admin.site.register(File)
+admin.site.register(Message)

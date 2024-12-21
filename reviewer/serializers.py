@@ -89,6 +89,7 @@ class AssignmentSerializer(serializers.ModelSerializer):
         files = self.context['request'].FILES.getlist('files', [])
         subtasks_data = validated_data.pop("subtasks", [])
         assignment = super().create(validated_data)
+        print(assignment.assigned_to_teams)
 
         for file in files:
             uploaded_file = File.objects.create(file=file)
@@ -120,6 +121,7 @@ class SubmissionSerializer(serializers.ModelSerializer):
     files = FileSerializer(many=True, read_only=True)
     reviews = ReviewSerializer(many=True, read_only=True)
     status = serializers.SerializerMethodField()
+    submitted_by = RevieweeSerializer(read_only=True)
 
     class Meta:
         model = Submission

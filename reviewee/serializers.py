@@ -1,11 +1,15 @@
 from rest_framework import serializers
-from assignment.models import Submission, Assignment, Subtask, File, Review
-
-
-class FileSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = File
-        fields = '__all__'
+from assignment.models import (
+    Submission,
+    Assignment,
+    Subtask,
+    File,
+    Review
+)
+from assignment.serializers import (
+    FileSerializer,
+    RevieweeSerializer
+)
 
 
 class SubtaskSerializer(serializers.ModelSerializer):
@@ -30,13 +34,10 @@ class ReviewSerializer(serializers.ModelSerializer):
 
 
 class SubmissionSerializer(serializers.ModelSerializer):
-    attachments = serializers.ListField(
-        child=serializers.FileField(allow_empty_file=True, use_url=False),
-        required=False
-    )
-    files = FileSerializer(many=True, read_only=True)
+    files = FileSerializer(many=True, required=False)
     reviews = ReviewSerializer(many=True, read_only=True)
     status = serializers.SerializerMethodField()
+    submitted_by = RevieweeSerializer(read_only=True)
 
     class Meta:
         model = Submission
@@ -59,10 +60,10 @@ class SubmissionSerializer(serializers.ModelSerializer):
         return attrs
 
     def create(self, validated_data):
-        attachments = validated_data.pop('attachments', [])
+        files = self.context['request'].FILES.getlist('files', [])
         assignment = super().create(validated_data)
 
-        for file in attachments:
+        for file in files:
             attachment = File.objects.create(file=file)
             assignment.files.add(attachment)
 

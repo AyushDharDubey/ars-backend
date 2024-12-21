@@ -9,3 +9,8 @@ class IsReviewee(BasePermission):
 class IsReviewer(BasePermission):
     def has_permission(self, request, view):
         return request.user.groups.filter(name='Reviewer').exists()
+
+
+class IsAdmin(BasePermission):
+    def has_permission(self, request, view):
+        return request.user.groups.filter(name='Admin').exists()
