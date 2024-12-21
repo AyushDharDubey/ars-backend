@@ -160,9 +160,11 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE =  'Asia/Kolkata'
 
 USE_I18N = True
+
+USE_L10N = True
 
 USE_TZ = True
 
@@ -183,3 +185,9 @@ CHANNELI_CLIENT_ID = os.environ.get('CHANNELI_CLIENT_ID')
 CHANNELI_CLIENT_SECRET = os.environ.get('CHANNELI_CLIENT_SECRET')
 BACKEND_BASE_URL = os.environ.get('BACKEND_BASE_URL')
 FRONTEND_BASE_URL = os.environ.get('FRONTEND_BASE_URL')
+EMAIL_HOST = os.environ.get('EMAIL_HOST')
+EMAIL_USE_TLS = True
+EMAIL_PORT = os.environ.get('EMAIL_PORT')
+EMAIL_FROM = os.environ.get('EMAIL_FROM')
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')

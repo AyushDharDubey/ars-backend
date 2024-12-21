@@ -12,13 +12,13 @@ from .serializers import (
     AssignmentSerializer,
     ReviewSerializer,
     SubmissionSerializer,
-    RevieweeSerializer
 )
 from rest_framework.generics import (
     CreateAPIView,
     ListAPIView,
     RetrieveUpdateAPIView,
     RetrieveUpdateDestroyAPIView,
+    GenericAPIView
 )
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
@@ -28,7 +28,7 @@ from django.contrib.auth.models import Group
 import json
 from rest_framework import status
 from rest_framework.response import Response
-
+from .utils import send_assignment_notification
 
 User = get_user_model()
 
@@ -123,3 +123,33 @@ class RetrieveUpdateReviewView(RetrieveUpdateAPIView):
         return Review.objects.filter(
             submission=self.kwargs['submission_pk']
         )
+
+
+class NotifyAssigneesView(GenericAPIView):
+    permission_classes = [IsAuthenticated, IsReviewer]
+
+    def post(self, request, *args, **kwargs):
+        assignment = get_object_or_404(
+            Assignment.objects.filter(reviewers=self.request.user),
+            pk=kwargs['assignment_pk']
+        )
+
+        assignees = list(assignment.assigned_to.all())
+        team_assignees = assignment.assigned_to_teams.prefetch_related('members')
+        team_members = [member.email for team in team_assignees for member in team.members.all()]
+        all_assignees = set([assignee.email for assignee in assignees] + team_members)
+
+        if send_assignment_notification(
+            user=self.request.user,
+            recipent_list=all_assignees,
+            assignment=assignment,
+        ):
+            return Response(
+                {"message": f"Notifications sent to {len(all_assignees)} assignees successfully."},
+                status=200
+            )
+        else:
+            return Response(
+                {"message": f"Try after some time."},
+                status=403
+            )
