@@ -1,6 +1,6 @@
 from .models import Team
 from assignment.permissions import IsReviewee, IsAdmin
-from .serializers import TeamSerializer, RevieweeSerializer
+from .serializers import TeamSerializer, RevieweeSerializer, ReviewerSerializer
 from rest_framework.generics import RetrieveAPIView, ListAPIView, CreateAPIView, RetrieveUpdateAPIView
 from rest_framework.permissions import IsAuthenticated
 from django.db.models import Q
@@ -24,6 +24,12 @@ class ListRevieweeView(ListAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = RevieweeSerializer
     queryset = User.objects.filter(groups__name='Reviewee')
+
+
+class ListReviewerView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = ReviewerSerializer
+    queryset = User.objects.filter(groups__name='Reviewer')
 
 
 class CreateTeamView(CreateAPIView):

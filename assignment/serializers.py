@@ -37,3 +37,10 @@ class RevieweeSerializer(serializers.ModelSerializer):
         model = User
         read_only_fields = ['id', 'username']
         fields = ['id', 'username']
+
+
+class ReviewerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        read_only_fields = ['id', 'username']
+        fields = ['id', 'username']
