@@ -173,7 +173,7 @@ class SignupAPIView(GenericAPIView):
                 },
                 status=status.HTTP_400_BAD_REQUEST
             )
-        if request.data.get('role') in ["Reviewee", "Reviewer"]:
+        if request.data.get('role') in ["Reviewee", "Reviewer", "Admin"]:
             group = Group.objects.get(name = request.data['role'])
         else:
             return Response(
