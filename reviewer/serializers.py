@@ -45,6 +45,7 @@ class SubtaskSerializer(serializers.ModelSerializer):
 
 
 class AssignmentSerializer(serializers.ModelSerializer):
+    status = serializers.SerializerMethodField()
     files = FileSerializer(many=True, required=False)
     subtasks = SubtaskSerializer(many=True, read_only=True)
     assigned_to = serializers.PrimaryKeyRelatedField(
@@ -62,6 +63,19 @@ class AssignmentSerializer(serializers.ModelSerializer):
     )
     created_by = serializers.HiddenField(default=serializers.CurrentUserDefault())
 
+    def get_status(self, obj):
+        submissions = Submission.objects.filter(assignment=obj)
+
+        if not submissions.exists():
+            return 'Pending'
+
+        latest_submission = submissions.order_by('-created_at').first()
+        latest_review = latest_submission.reviews.order_by('-created_at').first()
+
+        if latest_review:
+            return latest_review.status
+        else:
+            return 'Pending'
 
     class Meta:
         model = Assignment
