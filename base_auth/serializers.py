@@ -13,7 +13,7 @@ class ProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['username', 'email', 'first_name', 'last_name', 'roles']
+        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'roles']
     
     def get_roles(self, obj):
         return [group.name for group in obj.groups.all()]
