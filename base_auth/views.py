@@ -6,7 +6,6 @@ from .serializers import (
     SignupSerializer,
     LoginSerializer,
     ResetPasswordSerializer,
-    AccountActivateSerializer,
     ChangePasswordSerializer,
     OauthChanneliSerializer,
     ProfileSerializer,
@@ -199,47 +198,6 @@ class SignupAPIView(GenericAPIView):
                 'access_token': str(access_token)
             }
             return Response(content, status=status.HTTP_201_CREATED)
-        else:
-            return Response(
-                data={
-                    'errors': serializer.errors,
-                },
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-
-class AccountActivateView(GenericAPIView):
-    permission_classes = (IsAuthenticated,)
-    serializer_class = AccountActivateSerializer
-
-
-    def get(self, request, *args, **kwargs):
-        user = request.user
-        if not user.is_active:
-            if send_account_activation(user):
-                return Response('Email sent successfully', status=status.HTTP_200_OK)
-            else:
-                return Response({'error': 'try after some time'}, status.HTTP_400_BAD_REQUEST)
-        else:
-            return Response({'error': 'Email already verified'}, status.HTTP_400_BAD_REQUEST)
-
-
-
-    def post(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-
-        if serializer.is_valid():
-            user = serializer.user
-            user.is_active = True
-            user.otp = None
-            user.email_verification_token = None
-            user.save()
-            return Response(
-                data={
-                    'status': 'Account activated successfully'
-                },
-                status=status.HTTP_200_OK
-            )
         else:
             return Response(
                 data={

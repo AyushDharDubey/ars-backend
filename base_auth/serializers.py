@@ -58,38 +58,6 @@ class ResetPasswordSerializer(serializers.Serializer):
             raise serializers.ValidationError('Invalid token')
 
 
-class AccountActivateSerializer(serializers.Serializer):
-    username = serializers.CharField()
-    token = serializers.CharField(allow_blank=True, required=False)
-    otp = serializers.CharField(allow_blank=True, required=False)
-
-    def validate_username(self, username):
-        try:
-            self.user = User.objects.get(username=username)
-        except User.DoesNotExist:
-            raise serializers.ValidationError('User doesn\'t exist')
-        return username
-
-    def validate(self, data):
-        request = self.context.get('request')
-
-        if data.get('username'):
-            user = User.objects.get(username=data.get('username'))
-        elif request.user.is_authenticated:
-            user = request.user
-        else:
-            raise serializers.ValidationError('User doesn\'t exist')
-        
-        if (user.otp == data.get('otp') or user.email_verification_token == data.get('token')):
-            return data
-        elif data.get('otp'):
-            raise serializers.ValidationError('Incorrect OTP')
-        elif data.get('token'):
-            raise serializers.ValidationError('Incorrect token')
-        else:
-            raise serializers.ValidationError('Token or OTP not found')
-
-
 class SignupSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -112,22 +80,6 @@ class ChangePasswordSerializer(serializers.Serializer):
         if not auth:
             raise serializers.ValidationError('Wrong password')
         return current_password
-
-
-# class ChanneliUserSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = User
-#         fields = ['username', 'email', 'first_name', 'registration_method', 'is_active']
-
-#     def create(self, validated_data):
-#         user, created = User.objects.update_or_create(
-#             username = validated_data['username'],
-#             defaults = {
-#                 "first_name": validated_data['first_name'],
-#             }
-#         )
-#         print(validated_data)
-#         return user
 
 
 class OauthChanneliSerializer(serializers.Serializer):
