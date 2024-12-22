@@ -93,7 +93,7 @@ class OauthChanneliSerializer(serializers.Serializer):
             'client_id':settings.CHANNELI_CLIENT_ID,
             'client_secret':settings.CHANNELI_CLIENT_SECRET,
             'grant_type':'authorization_code',
-            'redirect_uri': settings.FRONTEND_BASE_URL + 'auth/oauth/channeli/callback/',
+            'redirect_uri': settings.FRONTEND_BASE_URL + '/auth/oauth/channeli/callback/',
             'code': attrs['code'],
         }
         response = requests.post('https://channeli.in/open_auth/token/', data=payload)

@@ -15,8 +15,8 @@ from datetime import timedelta
 
 CHANNELI_CLIENT_ID = os.environ.get('CHANNELI_CLIENT_ID')
 CHANNELI_CLIENT_SECRET = os.environ.get('CHANNELI_CLIENT_SECRET')
-BACKEND_BASE_URL = os.environ.get('BACKEND_BASE_URL', 'http://localhost:8000/')
-FRONTEND_BASE_URL = os.environ.get('FRONTEND_BASE_URL', 'http://localhost:3000/')
+BACKEND_BASE_URL = os.environ.get('BACKEND_BASE_URL', 'http://localhost:8000')
+FRONTEND_BASE_URL = os.environ.get('FRONTEND_BASE_URL', 'http://localhost:3000')
 EMAIL_HOST = os.environ.get('EMAIL_HOST')
 EMAIL_USE_TLS = True
 EMAIL_PORT = os.environ.get('EMAIL_PORT')
