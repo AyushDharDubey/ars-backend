@@ -26,5 +26,5 @@ urlpatterns = [
     path('reviewee/', include('reviewee.urls')),
 ]+ static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
-if settings.DEBUG == "True":
+if settings.DEBUG:
     urlpatterns += [path('admin/', admin.site.urls)]
