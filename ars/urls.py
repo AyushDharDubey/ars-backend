@@ -20,9 +20,11 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
     path('auth/', include('base_auth.urls')),
     path('api/', include('assignment.urls')),
     path('reviewer/', include('reviewer.urls')),
     path('reviewee/', include('reviewee.urls')),
 ]+ static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+
+if settings.DEBUG == "True":
+    urlpatterns += [path('admin/', admin.site.urls)]
