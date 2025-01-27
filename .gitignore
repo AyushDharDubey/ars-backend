@@ -10,5 +10,6 @@ __pycache__/
 
 # local test files
 /uploads/
-/defaultdb
+/db.sqlite3
 /static/
+/staticfiles/
