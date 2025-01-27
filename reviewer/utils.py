@@ -17,7 +17,7 @@ def send_assignment_notification(user, recipent_list, assignment):
     Due Date: {assignment.due_date}.
     """
     from_email = settings.EMAIL_FROM
-    # send_mail(subject, message, from_email, recipent_list)
+    send_mail(subject, message, from_email, recipent_list)
     cache.set(user.email, 'sent', 60)
     return True
 
