@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    command: bash -c "python manage.py makemigrations && python manage.py migrate && python manage.py collectstatic --no-input && python manage.py create_groups && daphne ars.asgi:application"
+    container_name: ars_backend
+    volumes:
+      - .:/ars_backend
+    ports:
+      - "8000:5000"
+    environment:
+      - CHANNELI_CLIENT_ID=0kSTSH5TGtritFQBE47Izrbv1yFeL0HSQZD3kyoZ
+      - CHANNELI_CLIENT_SECRET=v144rUfeDhAejIGJ0sdFdnOad3qiS2GqYJK3AkBnGxQnZzrdhn9xjHLYdH5jqf58dXX4EQwI1JD9SqHzWL7JRK28VjngX2DEB96sNmGopzdx27eGzFALobAXescPetG4
+      - BACKEND_BASE_URL=http://localhost:8000
+      - FRONTEND_BASE_URL=http://localhost:3000
+      - EMAIL_HOST=mxslurp.click
+      - EMAIL_PORT=2525
+      - EMAIL_FROM=user-f9df7f64-e2c3-4590-9aa3-8b8a465b36ad@mailslurp.biz
+      - EMAIL_HOST_USER=nEqnEVlzkxm7vc1gEkZll4C7xfMslh9O
+      - EMAIL_HOST_PASSWORD=0MtMZWsrMKXdbCQrgOor1pDKzkWnwaZc
+      - DJANGO_SETTINGS_MODULE=ars.settings
+      - DEBUG=False
